@@ -1,0 +1,64 @@
+-- ESP Script for Roblox
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+ 
+-- Function to create ESP for a player
+local function createESP(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local head = character:WaitForChild("Head")
+ 
+    -- Create BillboardGui for the username
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Adornee = head
+    billboardGui.Size = UDim2.new(0, 100, 0, 50)
+    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+    billboardGui.AlwaysOnTop = true
+ 
+    -- Create TextLabel for the username
+    local textLabel = Instance.new("TextLabel", billboardGui)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = player.Name
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextSize = 14
+ 
+    -- Create a unique color for the player
+    local highlightColor = Color3.new(math.random(), math.random(), math.random())
+ 
+    -- Create Highlight for the player
+    local highlight = Instance.new("Highlight", character)
+    highlight.FillColor = highlightColor
+    highlight.OutlineColor = Color3.new(0, 0, 0) -- Black outline
+    highlight.Enabled = true
+ 
+    -- Parent the BillboardGui to the head
+    billboardGui.Parent = head
+ 
+    -- Clean up when player leaves
+    player.AncestryChanged:Connect(function(_, parent)
+        if not parent then
+            highlight:Destroy()
+            billboardGui:Destroy()
+        end
+    end)
+end
+ 
+-- Create ESP for all players already in the game
+for _, player in ipairs(Players:GetPlayers()) do
+    createESP(player)
+end
+ 
+-- Create ESP for new players joining
+Players.PlayerAdded:Connect(createESP)
+ 
+-- Update existing players' ESP when their character is added
+Players.PlayerRemoving:Connect(function(player)
+    if player.Character then
+        local highlight = player.Character:FindFirstChildOfClass("Highlight")
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+end)
